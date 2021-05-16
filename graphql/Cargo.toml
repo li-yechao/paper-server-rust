@@ -1,0 +1,42 @@
+[package]
+name = "paper_graphql"
+version = "0.1.0"
+authors = ["LiYechao <liyechao@yechao.xyz>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+# Force openssl-sys to staticly link in the openssl library. Necessary when
+# cross compiling to *-musl
+default = ["openssl-sys/vendored"]
+
+[[bin]]
+name = "paper"
+path = "src/bin/paper.rs"
+
+[dependencies]
+actix-web = "3.3"
+actix-cors = "0.5"
+async-trait = "0.1"
+base64 = "0.13"
+clap = "2"
+derive_more = "0.99"
+mongodb = "1.2"
+juniper = { version = "0.15", default-features = false }
+juniper_actix = "0.2"
+log = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+shaku = "0.6"
+strum = { version = "0.20", features = ["derive"] }
+toml = "0.5"
+
+syn = "=1.0.59"
+
+# Add openssl-sys as a direct dependency so it can be cross compiled to
+# *-musl using the "vendored" feature below
+openssl-sys = "*"
+
+paper = { path = ".." }
+paper_impl = { path = "../impl" }

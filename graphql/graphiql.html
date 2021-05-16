@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>GraphQL</title>
+  <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/graphiql@0.17.5/graphiql.min.css">
+  <style>
+    html,
+    body,
+    #app {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app"></div>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.js"></script>
+  <script src="//unpkg.com/subscriptions-transport-ws@0.8.3/browser/client.js"></script>
+  <script src="//unpkg.com/graphiql-subscriptions-fetcher@0.0.2/browser/client.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/react/16.10.2/umd/react.production.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/react-dom/16.10.2/umd/react-dom.production.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/graphiql@1.1.0/graphiql.min.js"></script>
+  <script>
+    var GRAPHQL_URL = '/graphql';
+    var GRAPHQL_SUBSCRIPTIONS_URL = null;
+
+    if (GRAPHQL_SUBSCRIPTIONS_URL) {
+      var subscriptionEndpoint = normalizeSubscriptionEndpoint(GRAPHQL_URL, GRAPHQL_SUBSCRIPTIONS_URL);
+      var subscriptionsClient = new window.SubscriptionsTransportWs.SubscriptionClient(subscriptionEndpoint, { reconnect: true });
+    }
+
+    function normalizeSubscriptionEndpoint(endpoint, subscriptionEndpoint) {
+      if (subscriptionEndpoint) {
+        if (subscriptionEndpoint.startsWith('/')) {
+          const secure =
+            endpoint.includes('https') || location.href.includes('https')
+              ? 's'
+              : ''
+          return `ws${secure}://${location.host}${subscriptionEndpoint}`
+        } else {
+          return subscriptionEndpoint.replace(/^http/, 'ws')
+        }
+      }
+      return null
+    }
+
+    function graphQLFetcher(params, opts = { headers: {} }) {
+      return fetch(GRAPHQL_URL, {
+        method: 'post',
+        headers: Object.assign({
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        }, opts.headers),
+        credentials: 'include',
+        body: JSON.stringify(params)
+      }).then(function (response) {
+        return response.text();
+      }).then(function (body) {
+        try {
+          return JSON.parse(body);
+        } catch (error) {
+          return body;
+        }
+      });
+    }
+
+    var fetcher = GRAPHQL_SUBSCRIPTIONS_URL
+      ? window.GraphiQLSubscriptionsFetcher.graphQLFetcher(subscriptionsClient, graphQLFetcher)
+      : graphQLFetcher;
+
+    ReactDOM.render(
+      React.createElement(GraphiQL, {
+        fetcher,
+        headerEditorEnabled: true,
+      }),
+      document.querySelector('#app'));
+  </script>
+</body>
+
+</html>
