@@ -1,20 +1,22 @@
 [package]
-name = "paper"
+name = "paper_impl"
 version = "0.1.0"
 authors = ["LiYechao <liyechao@yechao.xyz>"]
 edition = "2018"
-
-[workspace]
-members = [
-    "impl",
-]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 async-trait = "0.1"
-jsonwebtoken = "7.2"
+bson = { version = "1.2", features = ["u2i"] }
+futures = "0.3"
+hyper = "0.13"
+hyper-tls = "0.4"
+lazy_static = "1.4"
+log = "0.4"
+mongodb = "1.2"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-serde_repr = "0.1"
-strum = { version = "0.20", features = ["derive"] }
+shaku = "0.6"
+
+paper = { path = ".." }
