@@ -123,6 +123,8 @@ pub mod content {
         BulletList(BulletList),
         TodoList(TodoList),
         CodeBlock(CodeBlock),
+        ImageBlock(ImageBlock),
+        VideoBlock(VideoBlock),
     }
 
     #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -235,5 +237,19 @@ pub mod content {
     #[serde(rename_all = "snake_case")]
     pub enum CodeBlockContent {
         Text(Text),
+    }
+
+    #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+    pub struct ImageBlock {
+        pub src: Option<String>,
+
+        pub caption: Option<String>,
+    }
+
+    #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+    pub struct VideoBlock {
+        pub src: Option<String>,
+
+        pub caption: Option<String>,
     }
 }
