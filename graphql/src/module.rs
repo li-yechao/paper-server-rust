@@ -14,19 +14,11 @@ crate::shaku_storage_collection_config!(
     PaperCollectionImpl
 );
 
-crate::shaku_storage_collection_config!(
-    PaperContentCollectionConfigInterface,
-    PaperContentCollectionConfig,
-    PaperContentCollection,
-    PaperContentCollectionImpl
-);
-
 shaku::module! {
     pub Module {
         components = [
             UserCollectionConfig,
             PaperCollectionConfig,
-            PaperContentCollectionConfig,
 
             AccessTokenConfig,
             RefreshTokenConfig,
@@ -37,8 +29,6 @@ shaku::module! {
         providers = [
             UserCollectionImpl,
             PaperCollectionImpl,
-            PaperContentCollectionImpl,
-
 
             AuthServiceImpl,
             UserServiceImpl,

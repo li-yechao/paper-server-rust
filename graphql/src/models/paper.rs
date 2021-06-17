@@ -35,38 +35,6 @@ impl Into<paper::OrderBy<paper::paper::PaperOrderField>> for PaperOrder {
     }
 }
 
-#[derive(GraphQLInputObject)]
-pub struct CreatePaperInput {
-    pub title: Option<String>,
-
-    pub content: Option<PaperContent>,
-}
-
-impl Into<paper::paper::CreatePaperInput> for CreatePaperInput {
-    fn into(self) -> paper::paper::CreatePaperInput {
-        paper::paper::CreatePaperInput {
-            title: self.title,
-            content: self.content.map(|x| x.into()),
-        }
-    }
-}
-
-#[derive(GraphQLInputObject)]
-pub struct UpdatePaperInput {
-    pub title: Option<String>,
-
-    pub content: Option<PaperContent>,
-}
-
-impl Into<paper::paper::UpdatePaperInput> for UpdatePaperInput {
-    fn into(self) -> paper::paper::UpdatePaperInput {
-        paper::paper::UpdatePaperInput {
-            title: self.title,
-            content: self.content.map(|x| x.into()),
-        }
-    }
-}
-
 #[derive(Clone)]
 pub struct Paper(paper::paper::Paper);
 
@@ -104,20 +72,6 @@ impl Paper {
         self.0.title.as_ref()
     }
 
-    async fn content(&self, ctx: &Context) -> Result<Option<PaperContent>> {
-        let paper_service: Box<dyn PaperService> = ctx.module.provide().unwrap();
-
-        paper_service
-            .select_paper_content(
-                ctx.access_token()?.sub,
-                self.0.user_id.to_owned(),
-                self.0.id.to_owned(),
-            )
-            .await
-            .map(|x| x.content.map(|x| x.into()))
-            .map_err(|e| e.into())
-    }
-
     async fn can_viewer_write_paper(&self, ctx: &Context) -> Result<bool> {
         let paper_service: Box<dyn PaperService> = ctx.module.provide().unwrap();
 
@@ -135,43 +89,6 @@ impl Paper {
                 },
                 |_| Ok(true),
             )
-    }
-}
-
-pub struct PaperContent(Vec<paper::paper::content::Block>);
-
-impl From<Vec<paper::paper::content::Block>> for PaperContent {
-    fn from(v: Vec<paper::paper::content::Block>) -> Self {
-        Self(v)
-    }
-}
-
-impl Into<Vec<paper::paper::content::Block>> for PaperContent {
-    fn into(self) -> Vec<paper::paper::content::Block> {
-        self.0
-    }
-}
-
-#[juniper::graphql_scalar(description = "Paper Content")]
-impl<S> GraphQLScalar for PaperContent
-where
-    S: ScalarValue,
-{
-    fn resolve(&self) -> Value {
-        juniper::Value::scalar(
-            serde_json::to_string(&self.0).expect("Serialize paper content error"),
-        )
-    }
-
-    fn from_input_value(v: &InputValue) -> Option<Self> {
-        v.as_scalar_value()
-            .and_then(|v| v.as_str())
-            .and_then(|s| serde_json::from_str::<Vec<paper::paper::content::Block>>(s).ok())
-            .map(|x| Self(x))
-    }
-
-    fn from_str<'a>(value: ScalarToken<'a>) -> juniper::ParseScalarResult<'a, S> {
-        <String as juniper::ParseScalarValue<S>>::from_str(value)
     }
 }
 

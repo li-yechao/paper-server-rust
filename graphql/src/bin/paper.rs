@@ -57,12 +57,6 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
                 database: db.clone(),
                 collection: config.storage.collection_paper.to_owned(),
             })
-            .with_component_parameters::<PaperContentCollectionConfig>(
-                PaperContentCollectionConfigParameters {
-                    database: db.clone(),
-                    collection: config.storage.collection_paper_content.to_owned(),
-                },
-            )
             .build();
 
         App::new()

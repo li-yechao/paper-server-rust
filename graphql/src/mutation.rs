@@ -6,7 +6,7 @@ use shaku::HasProvider;
 use crate::{
     models::{
         auth::{AccessToken, CreateAccessTokenInput},
-        paper::{CreatePaperInput, DeletePaperPayload, Paper, UpdatePaperInput},
+        paper::{DeletePaperPayload, Paper},
         user::{UpdateUserInput, User},
     },
     *,
@@ -39,41 +39,13 @@ impl Mutation {
             .map_err(|e| e.into())
     }
 
-    async fn create_paper(
-        ctx: &Context,
-        user_id: String,
-        input: CreatePaperInput,
-    ) -> Result<Paper> {
+    async fn create_paper(ctx: &Context, user_id: String) -> Result<Paper> {
         let paper_service: Box<dyn PaperService> = ctx.module.provide().unwrap();
 
         paper_service
-            .create_paper(
-                ctx.access_token()?.sub,
-                user_id.to_owned().into(),
-                input.into(),
-            )
+            .create_paper(ctx.access_token()?.sub, user_id.to_owned().into())
             .await
-            .map(|(x, _)| x.into())
-            .map_err(|e| e.into())
-    }
-
-    async fn update_paper(
-        ctx: &Context,
-        user_id: String,
-        paper_id: String,
-        input: UpdatePaperInput,
-    ) -> Result<Paper> {
-        let paper_service: Box<dyn PaperService> = ctx.module.provide().unwrap();
-
-        paper_service
-            .update_paper(
-                ctx.access_token()?.sub,
-                user_id.to_owned().into(),
-                paper_id.into(),
-                input.into(),
-            )
-            .await
-            .map(|(x, _)| x.into())
+            .map(|x| x.into())
             .map_err(|e| e.into())
     }
 

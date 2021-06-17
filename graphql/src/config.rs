@@ -39,8 +39,6 @@ pub struct ConfigStorage {
     pub collection_user: String,
 
     pub collection_paper: String,
-
-    pub collection_paper_content: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
