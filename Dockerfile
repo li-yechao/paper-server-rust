@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:1.0-experimental
-FROM liyechao/rust:1.49.0-0-musl AS build
+FROM liyechao/rust:1.53.0-0-musl AS build
 
 ARG TARGETPLATFORM
 
@@ -8,12 +8,12 @@ WORKDIR /app
 COPY . /app
 
 RUN --mount=type=cache,target=/usr/local/cargo/registry,id=cargo_cache \
-    --mount=type=cache,target=/app/target,id=arthur-build_target \
+    --mount=type=cache,target=/app/target,id=paper-graphql-target \
     set -eux; \
     case "$TARGETPLATFORM" in \
     # amd64
     linux/amd64) \
-    TARGET_CC=x86_64-linux-musl-gcc cargo build \
+    cargo build \
     -p paper_graphql \
     --bin paper \
     --release \
