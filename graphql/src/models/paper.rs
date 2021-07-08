@@ -5,7 +5,7 @@ use paper::{
     ErrorKind, Pagination, PaginationList,
 };
 use serde::{Deserialize, Serialize};
-use shaku::HasProvider;
+use shaku::{Component, HasComponent, HasProvider};
 
 use crate::{models::user::User, *};
 
@@ -73,6 +73,32 @@ impl Paper {
     }
 
     async fn can_viewer_write_paper(&self, ctx: &Context) -> Result<bool> {
+        self._can_viewer_write_paper(ctx).await
+    }
+
+    async fn token(&self, ctx: &Context) -> Result<PaperToken> {
+        let read_only = self._can_viewer_write_paper(ctx).await?;
+
+        let config: &dyn PaperTokenConfigInterface = ctx.module.resolve_ref();
+
+        let access_token = PaperTokenPayload::new(
+            ctx.access_token()?.sub,
+            config.expires_in_sec,
+            self.0.id.to_owned(),
+            Some(read_only),
+        )
+        .encode(&config.secret);
+
+        Ok(PaperToken {
+            access_token,
+            token_type: String::from("Bearer"),
+            expires_in: config.expires_in_sec.to_string(),
+        })
+    }
+}
+
+impl Paper {
+    async fn _can_viewer_write_paper(&self, ctx: &Context) -> Result<bool> {
         let paper_service: Box<dyn PaperService> = ctx.module.provide().unwrap();
 
         paper_service
@@ -89,6 +115,69 @@ impl Paper {
                 },
                 |_| Ok(true),
             )
+    }
+}
+
+#[derive(juniper::GraphQLObject)]
+pub struct PaperToken {
+    pub access_token: String,
+
+    pub token_type: String,
+
+    pub expires_in: String,
+}
+
+#[derive(Serialize)]
+pub struct PaperTokenPayload {
+    pub iat: u64,
+
+    pub exp: u64,
+
+    pub sub: UserId,
+
+    pub paper_id: PaperId,
+
+    pub read_only: Option<bool>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Component)]
+#[shaku(interface = PaperTokenConfigInterface)]
+pub struct PaperTokenConfig {
+    pub expires_in_sec: u64,
+
+    pub secret: String,
+}
+
+paper_impl::shaku_deref_self_interface!(PaperTokenConfigInterface, PaperTokenConfig);
+
+impl PaperTokenPayload {
+    pub fn new(
+        user_id: UserId,
+        expires_in_sec: u64,
+        paper_id: PaperId,
+        read_only: Option<bool>,
+    ) -> Self {
+        let now_sec = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("Invalid system time")
+            .as_secs();
+
+        Self {
+            iat: now_sec,
+            exp: now_sec + expires_in_sec,
+            sub: user_id,
+            paper_id,
+            read_only,
+        }
+    }
+
+    pub fn encode(&self, secret: impl AsRef<[u8]>) -> String {
+        jsonwebtoken::encode(
+            &jsonwebtoken::Header::default(),
+            &self,
+            &jsonwebtoken::EncodingKey::from_secret(secret.as_ref()),
+        )
+        .expect("Encode jsonwebtoken error")
     }
 }
 

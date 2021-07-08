@@ -1,5 +1,7 @@
 use paper_impl::{auth::*, paper::*, user::*};
 
+use crate::models::paper::PaperTokenConfig;
+
 crate::shaku_storage_collection_config!(
     UserCollectionConfigInterface,
     UserCollectionConfig,
@@ -22,6 +24,7 @@ shaku::module! {
 
             AccessTokenConfig,
             RefreshTokenConfig,
+            PaperTokenConfig,
 
             GithubAuthConfig,
             GoogleAuthConfig,

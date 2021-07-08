@@ -4,7 +4,7 @@ use actix_web::{
     middleware::Condition, web, App, HttpRequest, HttpResponse, HttpServer, Responder,
 };
 use juniper::EmptySubscription;
-use paper_graphql::{logger::Logger, *};
+use paper_graphql::{logger::Logger, models::paper::*, *};
 use paper_impl::auth::*;
 
 #[actix_web::main]
@@ -27,6 +27,10 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
             .with_component_parameters::<RefreshTokenConfig>(RefreshTokenConfigParameters {
                 expires_in_sec: config.refresh_token.expires_in_sec,
                 secret: config.refresh_token.secret.to_owned(),
+            })
+            .with_component_parameters::<PaperTokenConfig>(PaperTokenConfigParameters {
+                expires_in_sec: config.paper_token.expires_in_sec,
+                secret: config.paper_token.secret.to_owned(),
             })
             .with_component_parameters::<GithubAuthConfig>(GithubAuthConfigParameters {
                 list: config

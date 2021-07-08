@@ -16,6 +16,8 @@ pub struct Config {
 
     pub refresh_token: ConfigAccessToken,
 
+    pub paper_token: ConfigAccessToken,
+
     pub storage: ConfigStorage,
 
     pub github_auth: Vec<ConfigGithubAuth>,
