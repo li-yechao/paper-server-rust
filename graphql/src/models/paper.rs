@@ -72,6 +72,10 @@ impl Paper {
         self.0.title.as_ref()
     }
 
+    fn tags(&self) -> Option<&Vec<String>> {
+        self.0.tags.as_ref()
+    }
+
     async fn can_viewer_write_paper(&self, ctx: &Context) -> Result<bool> {
         self._can_viewer_write_paper(ctx).await
     }

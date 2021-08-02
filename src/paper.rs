@@ -66,4 +66,6 @@ pub struct Paper {
     pub deleted_at: Option<u64>,
 
     pub title: Option<String>,
+
+    pub tags: Option<Vec<String>>,
 }

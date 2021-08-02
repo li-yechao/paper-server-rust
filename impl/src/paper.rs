@@ -37,6 +37,7 @@ impl PaperService for PaperServiceImpl {
             updated_at: now,
             deleted_at: None,
             title: None,
+            tags: None,
         };
 
         self.paper_collection
@@ -171,5 +172,6 @@ lazy_static! {
         "updated_at": 1,
         "deleted_at": 1,
         "title": 1,
+        "tags": 1,
     };
 }
