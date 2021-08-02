@@ -77,7 +77,7 @@ impl Paper {
     }
 
     async fn token(&self, ctx: &Context) -> Result<PaperToken> {
-        let read_only = self._can_viewer_write_paper(ctx).await?;
+        let writable = self._can_viewer_write_paper(ctx).await?;
 
         let config: &dyn PaperTokenConfigInterface = ctx.module.resolve_ref();
 
@@ -85,7 +85,7 @@ impl Paper {
             ctx.access_token()?.sub,
             config.expires_in_sec,
             self.0.id.to_owned(),
-            Some(read_only),
+            Some(writable),
         )
         .encode(&config.secret);
 
@@ -137,7 +137,7 @@ pub struct PaperTokenPayload {
 
     pub paper_id: PaperId,
 
-    pub read_only: Option<bool>,
+    pub writable: Option<bool>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Component)]
@@ -155,7 +155,7 @@ impl PaperTokenPayload {
         user_id: UserId,
         expires_in_sec: u64,
         paper_id: PaperId,
-        read_only: Option<bool>,
+        writable: Option<bool>,
     ) -> Self {
         let now_sec = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -167,7 +167,7 @@ impl PaperTokenPayload {
             exp: now_sec + expires_in_sec,
             sub: user_id,
             paper_id,
-            read_only,
+            writable,
         }
     }
 
